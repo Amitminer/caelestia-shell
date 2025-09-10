@@ -1,0 +1,7 @@
+# Caelestia Quickshell Changelog
+
+- Improved icons.qml to display application icons with identifiers like dev.zed.Zed
+- Added notification panel to status icons in the bar
+- Enhanced design and animations for the performance tab
+- Added quickshell reboot action commands
+- Fixed QML parsing errors in Notifications.qml (onClicked signal handler syntax)

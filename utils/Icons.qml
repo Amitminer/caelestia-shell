@@ -138,8 +138,8 @@ Singleton {
             }
         }
 
-        console.log("No category icon found for " + name);
-        console.log("Fallback to " + fallback);
+        // console.log("No category icon found for " + name);
+        // console.log("Fallback to " + fallback);
         return fallback;
     }
 

@@ -94,6 +94,14 @@ JsonObject {
             dangerous: false
         },
         {
+            name: "Reload QS",
+            icon: "cached",
+            description: "Reload Quickshell session",
+            command: ["qs", "-c", "caelestia", "kill", "&", "caelestia", "shell", "-d"],
+            enabled: true,
+            dangerous: false
+        },
+        {
             name: "Shutdown",
             icon: "power_settings_new",
             description: "Shutdown the system",

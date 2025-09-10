@@ -139,7 +139,6 @@ Singleton {
             }
         }
     }
-
     Process {
         id: gpuTypeCheck
 
