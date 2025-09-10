@@ -520,7 +520,7 @@
 	},
 	"services": {
 		"weatherLocation": "",
-		"useFahrenheit": false,
+		"preferredTemperatureUnit": "celsius",
 		"useTwelveHourClock": true,
 		"gpuType": "",
 		"visualiserBars": 45,
