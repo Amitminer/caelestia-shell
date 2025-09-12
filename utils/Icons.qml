@@ -106,12 +106,40 @@ Singleton {
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
-        const categories = DesktopEntries.heuristicLookup(name)?.categories;
+        // Try exact lookup first
+        let categories = DesktopEntries.heuristicLookup(name)?.categories;
 
-        if (categories)
-            for (const [key, value] of Object.entries(categoryIcons))
-                if (categories.includes(key))
+        // If not found, try alternative lookups
+        if (!categories) {
+            // Try extracting the last part after the last dot (e.g., "dev.zed.Zed" -> "Zed")
+            const lastPart = name.split('.').pop();
+            if (lastPart && lastPart !== name) {
+                categories = DesktopEntries.heuristicLookup(lastPart)?.categories;
+            }
+
+            // Try lowercase version (e.g., "Zed" -> "zed")
+            if (!categories && lastPart) {
+                const lowerLastPart = lastPart.toLowerCase();
+                categories = DesktopEntries.heuristicLookup(lowerLastPart)?.categories;
+            }
+
+            // Try the full name in lowercase
+            if (!categories) {
+                const lowerName = name.toLowerCase();
+                categories = DesktopEntries.heuristicLookup(lowerName)?.categories;
+            }
+        }
+
+        if (categories) {
+            for (const [key, value] of Object.entries(categoryIcons)) {
+                if (categories.includes(key)) {
                     return value;
+                }
+            }
+        }
+
+        // console.log("No category icon found for " + name);
+        // console.log("Fallback to " + fallback);
         return fallback;
     }
 

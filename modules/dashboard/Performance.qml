@@ -105,6 +105,43 @@ RowLayout {
         onBg1Changed: canvas.requestPaint()
         onBg2Changed: canvas.requestPaint()
 
+        Rectangle {
+            anchors.centerIn: parent
+            width: parent.width * (1.1 + pulseScale.scale * 0.2)
+            height: parent.height * (1.1 + pulseScale.scale * 0.2)
+            color: "transparent"
+            border.color: Qt.rgba(res.fg1.r, res.fg1.g, res.fg1.b, 0.4 * (1 - pulseScale.scale))
+            border.width: 3
+            radius: width / 2
+            opacity: Math.max(res.value1, res.value2) > 0.8 ? 1 : 0
+            z: -1
+
+            SequentialAnimation on scale {
+                id: pulseScale
+                property real scale: 0
+                running: Math.max(res.value1, res.value2) > 0.8
+                loops: Animation.Infinite
+                NumberAnimation {
+                    from: 0
+                    to: 1
+                    duration: 1000
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    from: 1
+                    to: 0
+                    duration: 1000
+                    easing.type: Easing.InCubic
+                }
+            }
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 500
+                }
+            }
+        }
+
         Column {
             anchors.centerIn: parent
 
@@ -113,6 +150,44 @@ RowLayout {
 
                 text: res.label1
                 font.pointSize: Appearance.font.size.extraLarge * res.primaryMult
+                font.family: Appearance.font.family.mono
+
+                color: res.value1 > 0.85 ? "#ff6b47" : res.value1 > 0.7 ? "#ffa726" : res.value1 > 0.5 ? "#ffcc02" : Colours.palette.m3onSurface
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 400
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                transform: Scale {
+                    id: textScale
+                    origin.x: parent.width / 2
+                    origin.y: parent.height / 2
+                    xScale: 1.0
+                    yScale: 1.0
+                }
+
+                onTextChanged: bounceAnim.restart()
+
+                SequentialAnimation {
+                    id: bounceAnim
+                    NumberAnimation {
+                        target: textScale
+                        properties: "xScale,yScale"
+                        to: 1.1
+                        duration: 100
+                        easing.type: Easing.OutBack
+                    }
+                    NumberAnimation {
+                        target: textScale
+                        properties: "xScale,yScale"
+                        to: 1.0
+                        duration: 200
+                        easing.type: Easing.OutBounce
+                    }
+                }
             }
 
             StyledText {
@@ -121,6 +196,7 @@ RowLayout {
                 text: res.sublabel1
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.smaller * res.primaryMult
+                font.family: Appearance.font.family.mono
             }
         }
 
@@ -135,6 +211,16 @@ RowLayout {
 
                 text: res.label2
                 font.pointSize: Appearance.font.size.smaller * res.primaryMult
+                font.family: Appearance.font.family.mono
+
+                color: res.value2 > 0.9 ? "#ef5350" : res.value2 > 0.75 ? "#ff9800" : res.value2 > 0.6 ? "#ffeb3b" : Colours.palette.m3onSurface
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 400
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             StyledText {
@@ -143,6 +229,7 @@ RowLayout {
                 text: res.sublabel2
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.small * res.primaryMult
+                font.family: Appearance.font.family.mono
             }
         }
 
@@ -168,7 +255,7 @@ RowLayout {
                 ctx.reset();
 
                 ctx.lineWidth = res.thickness;
-                ctx.lineCap = Appearance.rounding.scale === 0 ? "square" : "round";
+                ctx.lineCap = "round";
 
                 const radius = (Math.min(width, height) - ctx.lineWidth) / 2;
                 const cx = centerX;
@@ -180,48 +267,90 @@ RowLayout {
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, a1s, a1e, false);
-                ctx.strokeStyle = res.bg1;
+                ctx.strokeStyle = Qt.rgba(res.bg1.r, res.bg1.g, res.bg1.b, 0.6);
                 ctx.stroke();
+
+                const color1 = res.value1 > 0.85 ? "#ff6b47" : res.value1 > 0.7 ? "#ffa726" : res.value1 > 0.5 ? "#ffcc02" : res.fg1;
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, a1s, (a1e - a1s) * res.value1 + a1s, false);
-                ctx.strokeStyle = res.fg1;
+                ctx.strokeStyle = color1;
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, a2s, a2e, false);
-                ctx.strokeStyle = res.bg2;
+                ctx.strokeStyle = Qt.rgba(res.bg2.r, res.bg2.g, res.bg2.b, 0.6);
                 ctx.stroke();
+
+                const color2 = res.value2 > 0.9 ? "#ef5350" : res.value2 > 0.75 ? "#ff9800" : res.value2 > 0.6 ? "#ffeb3b" : res.fg2;
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, a2s, (a2e - a2s) * res.value2 + a2s, false);
-                ctx.strokeStyle = res.fg2;
+                ctx.strokeStyle = color2;
                 ctx.stroke();
             }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+
+            onEntered: hoverAnim.to = 1.05
+            onExited: hoverAnim.to = 1.0
+
+            NumberAnimation on scale {
+                id: hoverAnim
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
+        }
+
         Behavior on value1 {
-            Anim {}
+            NumberAnimation {
+                duration: Appearance.anim.durations.normal * 1.2
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.1
+            }
         }
 
         Behavior on value2 {
-            Anim {}
+            NumberAnimation {
+                duration: Appearance.anim.durations.normal * 1.2
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.1
+            }
         }
 
         Behavior on fg1 {
-            CAnim {}
+            ColorAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
         }
 
         Behavior on fg2 {
-            CAnim {}
+            ColorAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
         }
 
         Behavior on bg1 {
-            CAnim {}
+            ColorAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
         }
 
         Behavior on bg2 {
-            CAnim {}
+            ColorAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
         }
     }
 }

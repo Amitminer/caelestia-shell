@@ -103,6 +103,30 @@ StyledRect {
             }
         }
 
+        // Notification Panel Icon
+        WrappedLoader {
+            name: "notifications"
+            active: Config.bar.status.showNotificationPanel
+            visible: active
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: {
+                    if (Notifs.silent)
+                        return "notifications_off";
+                    if (Notifs.list.length > 0)
+                        return "notifications";
+                    return "notifications_none";
+                }
+                color: Notifs.silent ? Colours.palette.m3error : root.colour
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Notifs.togglesilent()
+                }
+            }
+        }
+
         // Audio icon
         WrappedLoader {
             name: "audio"
