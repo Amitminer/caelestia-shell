@@ -54,6 +54,7 @@ CustomMouseArea {
     }
 
     anchors.fill: parent
+    anchors.margins: -1
     hoverEnabled: true
 
     onPressed: event => dragStart = Qt.point(event.x, event.y)
