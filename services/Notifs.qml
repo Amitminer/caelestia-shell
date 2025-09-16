@@ -11,6 +11,7 @@ import QtQuick
 Singleton {
     id: root
 
+    property bool silent: false
     readonly property list<Notif> list: []
     readonly property list<Notif> popups: list.filter(n => n.popup)
     property alias dnd: props.dnd
@@ -36,11 +37,23 @@ Singleton {
         onNotification: notif => {
             notif.tracked = true;
 
-            if (!props.dnd)
-                root.list.push(notifComp.createObject(root, {
-                    popup: true,
-                    notification: notif
-                }));
+            root.list.push(notifComp.createObject(root, {
+                popup: !root.silent,
+                notification: notif
+            }));
+
+        }
+    }
+
+    function togglesilent(value) {
+        let newValue = (value !== undefined) ? value : !root.silent;
+        if (root.silent === newValue)
+            return;
+        root.silent = newValue;
+        if (root.silent) {
+            for (var i = 0; i < root.list.length; i++) {
+                root.list[i].popup = false;
+            }
         }
     }
 

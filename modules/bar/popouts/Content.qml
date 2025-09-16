@@ -56,6 +56,13 @@ Item {
         }
 
         Popout {
+            name: "notifications"
+            sourceComponent: Notifications {
+                wrapper: root.wrapper
+            }
+        }
+
+        Popout {
             name: "kblayout"
             source: "KbLayout.qml"
         }

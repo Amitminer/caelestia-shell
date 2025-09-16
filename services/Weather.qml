@@ -22,7 +22,7 @@ Singleton {
         if (Config.services.weatherLocation)
             city = Config.services.weatherLocation;
         else if (!city || timer.elapsed() > 900)
-            Requests.get("https://ipinfo.io/json", text => {
+            Requests.get("http://ip-api.com/json", text => {
                 city = JSON.parse(text).city ?? "";
                 timer.restart();
             });
