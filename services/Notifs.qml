@@ -38,14 +38,11 @@ Singleton {
             notif.tracked = true;
 
             root.list.push(notifComp.createObject(root, {
-<<<<<<< HEAD
                 popup: !root.silent,
                 notification: notif
             }));
-
         }
     }
-
     function togglesilent(value) {
         let newValue = (value !== undefined) ? value : !root.silent;
         if (root.silent === newValue)
@@ -55,11 +52,6 @@ Singleton {
             for (var i = 0; i < root.list.length; i++) {
                 root.list[i].popup = false;
             }
-=======
-                popup: !props.dnd,
-                notification: notif
-            }));
->>>>>>> 542495c (notifs: fix dnd)
         }
     }
 
