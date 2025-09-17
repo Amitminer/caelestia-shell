@@ -91,7 +91,7 @@ ColumnLayout {
         Layout.bottomMargin: Appearance.padding.small
         label: qsTr("Do Not Disturb")
         checked: Notifs.dnd
-        toggle.onToggled: Notifs.toggleDnd()
+        toggle.onToggled: Notifs.dnd = !Notifs.dnd
     }
 
     Item {

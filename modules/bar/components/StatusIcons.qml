@@ -122,7 +122,7 @@ StyledRect {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: Notifs.toggleDnd()
+                    onClicked: Notifs.dnd = !Notifs.dnd
                 }
             }
         }
