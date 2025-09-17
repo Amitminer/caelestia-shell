@@ -112,17 +112,17 @@ StyledRect {
             sourceComponent: MaterialIcon {
                 animate: true
                 text: {
-                    if (Notifs.silent)
+                    if (Notifs.dnd)
                         return "notifications_off";
                     if (Notifs.list.length > 0)
                         return "notifications";
                     return "notifications_none";
                 }
-                color: Notifs.silent ? Colours.palette.m3error : root.colour
+                color: Notifs.dnd ? Colours.palette.m3error : root.colour
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: Notifs.togglesilent()
+                    onClicked: Notifs.toggleDnd()
                 }
             }
         }

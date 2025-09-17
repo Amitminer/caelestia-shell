@@ -55,13 +55,13 @@ ColumnLayout {
 
         MaterialIcon {
             text: {
-                if (Notifs.silent)
+                if (Notifs.dnd)
                     return "notifications_off";
                 if (notifCount > 0)
                     return "notifications";
                 return "notifications_none";
             }
-            color: Notifs.silent ? Colours.palette.m3error : Colours.palette.m3primary
+            color: Notifs.dnd ? Colours.palette.m3error : Colours.palette.m3primary
         }
 
         StyledText {
@@ -90,8 +90,8 @@ ColumnLayout {
         Layout.rightMargin: Appearance.padding.normal
         Layout.bottomMargin: Appearance.padding.small
         label: qsTr("Do Not Disturb")
-        checked: Notifs.silent
-        toggle.onToggled: Notifs.togglesilent()
+        checked: Notifs.dnd
+        toggle.onToggled: Notifs.toggleDnd()
     }
 
     Item {
