@@ -2,6 +2,7 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 
 import qs.components.misc
+import qs.config
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -43,13 +44,13 @@ Singleton {
     function increaseBrightness(): void {
         const monitor = getMonitor("active");
         if (monitor)
-            monitor.setBrightness(monitor.brightness + 0.1);
+            monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
     }
 
     function decreaseBrightness(): void {
         const monitor = getMonitor("active");
         if (monitor)
-            monitor.setBrightness(monitor.brightness - 0.1);
+            monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
     }
 
     onMonitorsChanged: {
