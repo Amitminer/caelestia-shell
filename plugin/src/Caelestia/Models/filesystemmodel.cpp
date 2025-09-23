@@ -8,7 +8,7 @@ namespace caelestia {
 
 FileSystemEntry::FileSystemEntry(const QString& path, const QString& relativePath, QObject* parent)
     : QObject(parent)
-    , m_fileInfo(QFileInfo(path))
+    , m_fileInfo(path)
     , m_path(path)
     , m_relativePath(relativePath)
     , m_isImageInitialised(false)
@@ -64,6 +64,14 @@ QString FileSystemEntry::mimeType() const {
     return m_mimeType;
 }
 
+void FileSystemEntry::updateRelativePath(const QDir& dir) {
+    const auto relPath = dir.relativeFilePath(m_path);
+    if (m_relativePath != relPath) {
+        m_relativePath = relPath;
+        emit relativePathChanged();
+    }
+}
+
 FileSystemModel::FileSystemModel(QObject* parent)
     : QAbstractListModel(parent)
     , m_recursive(false)
@@ -105,6 +113,11 @@ void FileSystemModel::setPath(const QString& path) {
     emit pathChanged();
 
     m_dir.setPath(m_path);
+
+    for (const auto& entry : std::as_const(m_entries)) {
+        entry->updateRelativePath(m_dir);
+    }
+
     update();
 }
 
@@ -253,11 +266,14 @@ void FileSystemModel::updateWatcher() {
 void FileSystemModel::updateEntries() {
     if (m_path.isEmpty()) {
         if (!m_entries.isEmpty()) {
+            auto toDelete = m_entries;
+
             beginResetModel();
-            qDeleteAll(m_entries);
             m_entries.clear();
-            emit entriesChanged();
             endResetModel();
+            emit entriesChanged();
+
+            qDeleteAll(toDelete);
         }
 
         return;
@@ -276,8 +292,11 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto showHidden = m_showHidden;
     const auto filter = m_filter;
     const auto nameFilters = m_nameFilters;
-    const auto oldEntries = m_entries;
-    const auto baseDir = m_dir;
+
+    QSet<QString> oldPaths;
+    for (const auto& entry : std::as_const(m_entries)) {
+        oldPaths << entry->path();
+    }
 
     const auto future = QtConcurrent::run([=](QPromise<QPair<QSet<QString>, QSet<QString>>>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
@@ -286,7 +305,8 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
 
         if (filter == Images) {
             QStringList extraNameFilters = nameFilters;
-            for (const auto& format : QImageReader::supportedImageFormats()) {
+            const auto formats = QImageReader::supportedImageFormats();
+            for (const auto& format : formats) {
                 extraNameFilters << "*." + format;
             }
 
@@ -336,11 +356,6 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
             newPaths.insert(path);
         }
 
-        QSet<QString> oldPaths;
-        for (const auto& entry : oldEntries) {
-            oldPaths.insert(entry->path());
-        }
-
         if (promise.isCanceled() || newPaths == oldPaths) {
             return;
         }
@@ -381,9 +396,11 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     }
     std::sort(removedIndices.begin(), removedIndices.end(), std::greater<int>());
 
+    QList<FileSystemEntry*> toDelete;
+
     int start = -1;
     int end = -1;
-    for (int idx : removedIndices) {
+    for (int idx : std::as_const(removedIndices)) {
         if (start == -1) {
             start = idx;
             end = idx;
@@ -393,7 +410,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
             beginRemoveRows(QModelIndex(), end, start);
             for (int i = start; i >= end; --i) {
                 emit removed(m_entries[i]->path());
-                m_entries.takeAt(i)->deleteLater();
+                toDelete << m_entries.takeAt(i);
             }
             endRemoveRows();
 
@@ -405,7 +422,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
         beginRemoveRows(QModelIndex(), end, start);
         for (int i = start; i >= end; --i) {
             emit removed(m_entries[i]->path());
-            m_entries.takeAt(i)->deleteLater();
+            toDelete << m_entries.takeAt(i);
         }
         endRemoveRows();
     }
@@ -414,16 +431,18 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     for (const auto& path : addedPaths) {
         newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
     }
-    const auto comp = [this](const FileSystemEntry* a, const FileSystemEntry* b) {
+    std::sort(newEntries.begin(), newEntries.end(), [this](const FileSystemEntry* a, const FileSystemEntry* b) {
         return compareEntries(a, b);
-    };
-    std::sort(newEntries.begin(), newEntries.end(), comp);
+    });
 
     int insertStart = -1;
     int prevRow = -1;
     QList<FileSystemEntry*> batchItems;
-    for (const auto& entry : newEntries) {
-        const auto it = std::lower_bound(m_entries.begin(), m_entries.end(), entry, comp);
+    for (const auto& entry : std::as_const(newEntries)) {
+        const auto it = std::lower_bound(
+            m_entries.begin(), m_entries.end(), entry, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
+                return compareEntries(a, b);
+            });
         int row = static_cast<int>(it - m_entries.begin());
 
         if (insertStart == -1) {
@@ -459,6 +478,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     }
 
     emit entriesChanged();
+    qDeleteAll(toDelete);
 }
 
 bool FileSystemModel::compareEntries(const FileSystemEntry* a, const FileSystemEntry* b) const {
