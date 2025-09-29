@@ -12,7 +12,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.modules.notifications as NotificationComponents
-import "services" as Services
+// import "services" as Services // Unused import removed
 
 ColumnLayout {
     id: root
@@ -148,7 +148,7 @@ ColumnLayout {
                 interactive: true
 
                 model: ScriptModel {
-                    values: [...Notifs.list].reverse()
+                    values: [...Notifs.list].filter(n => !n.closed).reverse()
                 }
 
                 delegate: Item {
@@ -178,7 +178,14 @@ ColumnLayout {
                     }
                 }
 
-                remove: null // No fade-out animation
+                remove: Transition {
+                    NumberAnimation {
+                        property: "opacity"
+                        to: 0
+                        duration: Appearance.anim.durations.normal
+                        easing.type: Easing.OutCubic
+                    }
+                }
 
                 displaced: Transition {
                     NumberAnimation {
@@ -227,10 +234,11 @@ ColumnLayout {
             opacity: notifCount === 0 ? 0.4 : 1.0
 
             function onClicked(): void {
+                // Clear notifications by calling close() on each notification object
                 for (let i = root.notifCount - 1; i >= 0; i--) {
                     const n = root.notifAt(i);
-                    if (n && n.notification && typeof n.notification.dismiss === 'function') {
-                        n.notification.dismiss();
+                    if (n && typeof n.close === 'function') {
+                        n.close();
                     }
                 }
             }
