@@ -65,6 +65,11 @@ Item {
             sourceComponent: LockStatus {}
         }
 
+        Popout {
+            name: "stopwatch"
+            sourceComponent: Stopwatch {}
+        }
+
         Repeater {
             model: ScriptModel {
                 values: [...SystemTray.items.values]

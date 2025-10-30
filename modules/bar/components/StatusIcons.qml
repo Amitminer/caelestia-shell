@@ -103,6 +103,18 @@ StyledRect {
             }
         }
 
+        // Stopwatch icon
+        WrappedLoader {
+            name: "stopwatch"
+            active: Config.bar.status.showStopwatch
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: "timer"
+                color: root.colour
+            }
+        }
+
         // Audio icon
         WrappedLoader {
             name: "audio"
