@@ -90,11 +90,14 @@ StyledClippingRect {
         MouseArea {
             anchors.fill: layout
             onClicked: event => {
-                const ws = layout.childAt(event.x, event.y).ws;
-                if (Hypr.activeWsId !== ws)
-                    Hypr.dispatch(`workspace ${ws}`);
-                else
-                    Hypr.dispatch("togglespecialworkspace special");
+                const child = layout.childAt(event.x, event.y);
+                if (child && child.ws !== undefined) {
+                    const ws = child.ws;
+                    if (Hypr.activeWsId !== ws)
+                        Hypr.dispatch(`workspace ${ws}`);
+                    else
+                        Hypr.dispatch("togglespecialworkspace special");
+                }
             }
         }
 
