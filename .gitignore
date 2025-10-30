@@ -3,3 +3,6 @@
 /.qmlls.ini
 build/
 .cache/
+DOCUMENTATION.md
+QUICK_REFERENCE.md
+EXAMPLES.md

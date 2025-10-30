@@ -106,13 +106,33 @@ Singleton {
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
-        const categories = DesktopEntries.heuristicLookup(name)?.categories;
+        function tryLookup(lookupName) {
+            const categories = DesktopEntries.heuristicLookup(lookupName)?.categories;
+            if (categories) {
+                for (const [key, value] of Object.entries(categoryIcons)) {
+                    if (categories.includes(key)) {
+                        return value;
+                    }
+                }
+            }
+            return null;
+        }
 
-        if (categories)
-            for (const [key, value] of Object.entries(categoryIcons))
-                if (categories.includes(key))
-                    return value;
-        return fallback;
+        let icon = tryLookup(name);
+        if (!icon && name.includes('.')) {
+            const lastPart = name.split('.').pop();
+            if (lastPart && lastPart !== name) {
+                icon = tryLookup(lastPart);
+                if (!icon) {
+                    icon = tryLookup(lastPart.toLowerCase());
+                }
+            }
+        }
+        if (!icon) {
+            icon = tryLookup(name.toLowerCase());
+        }
+
+        return icon || fallback;
     }
 
     function getNetworkIcon(strength: int): string {
@@ -194,13 +214,13 @@ Singleton {
 
     function getSpecialWsIcon(name: string): string {
         name = name.toLowerCase().slice("special:".length);
-        
+
         for (const iconConfig of Config.bar.workspaces.specialWorkspaceIcons) {
             if (iconConfig.name === name) {
                 return iconConfig.icon;
             }
         }
-        
+
         if (name === "special")
             return "star";
         if (name === "communication")
