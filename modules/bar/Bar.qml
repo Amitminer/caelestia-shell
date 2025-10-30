@@ -120,7 +120,9 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "logo"
                 delegate: WrappedLoader {
-                    sourceComponent: OsIcon {}
+                    sourceComponent: OsIcon {
+                        visibilities: root.visibilities
+                    }
                 }
             }
             DelegateChoice {
