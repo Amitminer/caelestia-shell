@@ -11,7 +11,7 @@ ColumnLayout {
     id: root
 
     spacing: Appearance.spacing.small
-    width: Config.bar.sizes.networkWidth //using width as networkicon
+    width: Config.bar.sizes.stopwatch
 
     // Header
     StyledText {
@@ -66,10 +66,10 @@ ColumnLayout {
             Layout.preferredHeight: startStopBtn.implicitHeight + Appearance.padding.small * 2
 
             radius: Appearance.rounding.full
-            color: StopwatchState.isRunning ? Colours.palette.m3errorContainer : "#1976d2" //Hardcoded: Material Design blue for start button
+            color: StopwatchState.isRunning ? Colours.palette.m3errorContainer : Colours.palette.m3primary
 
             StateLayer {
-                color: StopwatchState.isRunning ? Colours.palette.m3onErrorContainer : Qt.rgba(1, 1, 1, 0.87)
+                color: StopwatchState.isRunning ? Colours.palette.m3onErrorContainer : Colours.palette.m3primaryContainer
 
                 function onClicked(): void {
                     StopwatchState.toggle();
@@ -84,12 +84,12 @@ ColumnLayout {
                 MaterialIcon {
                     animate: true
                     text: StopwatchState.isRunning ? "pause" : "play_arrow"
-                    color: StopwatchState.isRunning ? Colours.palette.m3onErrorContainer : Qt.rgba(1, 1, 1, 0.87)
+                    color: StopwatchState.isRunning ? Colours.palette.m3onErrorContainer : Colours.palette.m3primaryContainer
                 }
 
                 StyledText {
                     text: StopwatchState.isRunning ? qsTr("Pause") : qsTr("Start")
-                    color: StopwatchState.isRunning ? Colours.palette.m3onErrorContainer : Qt.rgba(1, 1, 1, 0.87)
+                    color: StopwatchState.isRunning ? Colours.palette.m3onErrorContainer : Colours.palette.m3primaryContainer
                     font.weight: 500
                 }
             }
