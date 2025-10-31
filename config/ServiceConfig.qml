@@ -17,4 +17,5 @@ JsonObject {
             "to": "YT Music"
         }
     ]
+    property string geminiApiKey: ""
 }
