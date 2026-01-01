@@ -399,6 +399,10 @@ default, you must create it manually.
                     "icon": "sports_esports"
                 }
             ]
+        },
+        "excludedScreens": [""],
+        "activeWindow": {
+            "inverted": false
         }
     },
     "border": {
@@ -543,6 +547,7 @@ default, you must create it manually.
         "clearThreshold": 0.3,
         "defaultExpireTimeout": 5000,
         "expandThreshold": 20,
+        "openExpanded": false,
         "expire": false
     },
     "osd": {
